@@ -199,8 +199,6 @@ M.format_socialwall.postforminit = function (data) {
         if (showcomments) {
             showcomments.setHTML(M.str.format_socialwall.showcomments.replace('{$a}', responsedata.countcomments));
 
-            console.log(responsedata.countcomments);
-            console.log(showcomments.ancestor('.tl-showcomments'));
             if (responsedata.countcomments > 0) {
                 showcomments.ancestor('.tl-showcomments').removeClass('not-comments');
             } else {
@@ -248,14 +246,16 @@ M.format_socialwall.postforminit = function (data) {
 
     function onClickShowComments(postid) {
 
-        Y.one('#tlshowcomments_' + postid + '_0').replaceClass('comments-hide', 'comments-show');
+        var node = Y.one('#tlshowcomments_' + postid + '_0');
 
-        Y.one('body').delegate('key', function (e) {
-            e.preventDefault();
-            onClickCloseComments();
-        }, 'esc');
+        if (node) {
+            node.replaceClass('comments-hide', 'comments-show');
 
-
+            Y.one('body').delegate('key', function (e) {
+                e.preventDefault();
+                onClickCloseComments();
+            }, 'esc');
+        }
     }
 
     function onClickCloseComments() {
