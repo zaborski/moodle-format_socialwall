@@ -122,6 +122,10 @@ class format_socialwall extends format_topics {
                 'deletemodspermanently' => array(
                     'default' => $courseconfig->deleteafterunenrol,
                     'type' => PARAM_BOOL
+                ),
+                'inlinecomments' => array(
+                    'default' => $courseconfig->inlinecomments,
+                    'type' => PARAM_BOOL
                 )
             );
         }
@@ -181,6 +185,12 @@ class format_socialwall extends format_topics {
                     'label' => new lang_string('deletemodspermanently', 'format_socialwall'),
                     'element_type' => 'selectyesno',
                     'help' => 'deletemodspermanently',
+                    'help_component' => 'format_socialwall'
+                ),
+                'inlinecomments' => array(
+                    'label' => new lang_string('inlinecomments', 'format_socialwall'),
+                    'element_type' => 'selectyesno',
+                    'help' => 'inlinecomments',
                     'help_component' => 'format_socialwall'
                 ),
                 'numsections' => array(

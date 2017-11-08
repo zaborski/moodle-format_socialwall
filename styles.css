@@ -305,3 +305,72 @@ body#page-course-format-socialwall-pages-addactivity .mform:not(.unresponsive) .
     border-radius: 0 0 10px 10px;
     padding: 10px 0 0 0;
 }
+
+.format-socialwall .w-comments.comments-hide {
+    display: none;
+}
+
+.format-socialwall .w-comments.comments-show {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    overflow: auto;
+    background-color: rgba(88, 88, 88, 0.7);
+    z-index: 99999;
+    padding: 30px 5px 5px;
+}
+
+.format-socialwall .w-comments.comments-show .tl-comments,
+.format-socialwall .w-comments.comments-show .tl-showall {
+    background-color: #ffffff;
+    padding: 10px;
+}
+
+.format-socialwall .w-comments .tl-w-comments-title {
+    background-color: #000000;
+    padding: 5px;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    text-align: right;
+}
+
+.format-socialwall .w-comments .tl-w-comments-title span {
+    cursor: pointer;
+    border: 1px solid #ffffff;
+    border-radius: 5px;
+    width: 20px;
+    height: 20px;
+    display: inline-block;
+    text-align: center;
+    color: #000000;
+    background-color: #ffffff;
+}
+
+.format-socialwall .w-comments .tl-w-comments-title span:hover {
+    color: #ffffff;
+    background-color: #000000;
+}
+
+@media (max-width:550px) {
+    .format-socialwall #postform #sw-addactivitylink {
+        margin-right: 0;
+    }
+
+    .format-socialwall #region-main-box {
+        padding-left: 5px;
+        padding-right: 5px;
+    }
+
+    .format-socialwall .tl-posts {
+        padding-left: 0;
+    }
+
+    .format-socialwall .card-block {
+        padding-left: 0;
+        padding-right: 0;
+    }
+}

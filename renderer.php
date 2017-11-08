@@ -177,7 +177,7 @@ class format_socialwall_renderer extends format_topics_renderer {
         }
 
         $c = html_writer::tag('div', fullname($commentauthor) . $dl, array('class' => 'tl-authorname'));
-        $c .= html_writer::tag('div', $comment->text);
+        $c .= html_writer::tag('div', format_text($comment->text));
         $c .= html_writer::tag('span', $this->render_timeline_comment_ago($comment->timecreated), array('class' => 'tl-timeago'));
 
         $o .= html_writer::tag('div', $c, array('class' => 'tl-text'));
@@ -512,16 +512,41 @@ class format_socialwall_renderer extends format_topics_renderer {
         $p .= html_writer::tag('div', $actionarea, array('class' => 'tl-post-actionarea'));
 
         // ... print out all comments.
+        $courseconfig = get_config('format_socialwall');
+
         $c = $this->render_timeline_comments($post, $authors, $coursecontext, $course);
-        $p .= html_writer::tag('ul', $c, array('class' => 'tl-comments', 'id' => 'tlcomments_' . $post->id . '_0'));
 
         $morecommentscount = $post->countcomments - $course->tlnumcomments;
-        if ($morecommentscount > 0) {
 
-            $url = new moodle_url('/course/format/socialwall/action.php');
-            $strmore = get_string('showallcomments', 'format_socialwall', $morecommentscount);
-            $l = html_writer::link('#', $strmore, array('id' => 'tlshowall_' . $post->id));
-            $p .= html_writer::tag('div', $l, array('class' => 'tl-showall'));
+        if (empty($course->inlinecomments) && $post->countcomments > 0) {
+            $strshow = get_string('showcomments', 'format_socialwall', $post->countcomments);
+            $l = html_writer::link('#', $strshow, array('id' => 'tlshowcomments_' . $post->id));
+            $p .= html_writer::tag('div', $l, array('class' => 'tl-showcomments'));
+
+            $closeicon = html_writer::tag('span', 'x', array('id' => 'tlclosecomments_' . $post->id, 'title' => get_string('closebuttontitle')));
+
+            $comments = html_writer::tag('div', $closeicon, array('class' => 'tl-w-comments-title'));
+            $comments .= html_writer::tag('ul', $c, array('class' => 'tl-comments', 'id' => 'tlcomments_' . $post->id . '_0'));
+
+            if ($morecommentscount > 0) {
+
+                $url = new moodle_url('/course/format/socialwall/action.php');
+                $strmore = get_string('showallcomments', 'format_socialwall', $morecommentscount);
+                $l = html_writer::link('#', $strmore, array('id' => 'tlshowall_' . $post->id));
+                $comments .= html_writer::tag('div', $l, array('class' => 'tl-showall'));
+            }
+
+            $p .= html_writer::tag('div', $comments, array('class' => 'w-comments comments-hide', 'id' => 'tlshowcomments_' . $post->id . '_0'));
+        } else {
+            $p .= html_writer::tag('ul', $c, array('class' => 'tl-comments', 'id' => 'tlcomments_' . $post->id . '_0'));
+
+            if ($morecommentscount > 0) {
+
+                $url = new moodle_url('/course/format/socialwall/action.php');
+                $strmore = get_string('showallcomments', 'format_socialwall', $morecommentscount);
+                $l = html_writer::link('#', $strmore, array('id' => 'tlshowall_' . $post->id));
+                $p .= html_writer::tag('div', $l, array('class' => 'tl-showall'));
+            }
         }
 
         $o .= html_writer::tag('div', $p, array('class' => 'tl-text'));
@@ -855,7 +880,7 @@ class format_socialwall_renderer extends format_topics_renderer {
         );
 
         $this->page->requires->strings_for_js(
-                array('counttotalpost', 'like', 'likenomore', 'countlikes', 'countcomments', 'textrequired', 'confirmdeletecomment'), 'format_socialwall');
+                array('counttotalpost', 'like', 'likenomore', 'countlikes', 'countcomments', 'textrequired', 'confirmdeletecomment', 'showcomments'), 'format_socialwall');
 
         $this->page->requires->yui_module(
                 'moodle-format_socialwall-postform', 'M.format_socialwall.postforminit', array($args), null, true);

@@ -193,6 +193,11 @@ M.format_socialwall.postforminit = function (data) {
             countcomments.setHTML(M.str.format_socialwall.countcomments.replace('{$a}', responsedata.countcomments));
         }
 
+        var showcomments = Y.one('#tlshowcomments_' + responsedata.postid);
+        if (showcomments) {
+            showcomments.setHTML(M.str.format_socialwall.showcomments.replace('{$a}', responsedata.countcomments));
+        }
+
         var countlikes = Y.one('#tlcountlikes_' + responsedata.postid);
         if (countlikes) {
             countlikes.setHTML(M.str.format_socialwall.countlikes.replace('{$a}', responsedata.countlikes));
@@ -226,6 +231,24 @@ M.format_socialwall.postforminit = function (data) {
         }, linknode, function (r) {
             callbackAllCommentsLoaded(r);
         });
+    }
+
+    function onClickShowComments(linknode) {
+
+        Y.one('#tlshowcomments_' + linknode.get('id').split('_')[1] + '_0').replaceClass('comments-hide', 'comments-show');
+
+        Y.one('body').delegate('key', function (e) {
+            e.preventDefault();
+            onClickCloseComments();
+        }, 'esc');
+
+
+    }
+
+    function onClickCloseComments() {
+
+        Y.one('.w-comments.comments-show').replaceClass('comments-show', 'comments-hide');
+        Y.one('body').detach('key');
     }
 
     function callbackAllCommentsLoaded(responsedata) {
@@ -320,7 +343,8 @@ M.format_socialwall.postforminit = function (data) {
             title: M.util.get_string('confirm', 'moodle'),
             question: M.util.get_string('confirmdeletecomment', 'format_socialwall'),
             yesLabel: M.util.get_string('yes', 'moodle'),
-            noLabel: M.util.get_string('cancel', 'moodle')
+            noLabel: M.util.get_string('cancel', 'moodle'),
+            zIndex: 999999
         });
 
         confirm.on('complete-yes', function () {
@@ -482,6 +506,16 @@ M.format_socialwall.postforminit = function (data) {
             var replycommentid = e.target.get('id').split('_') [2];
             Y.one('#tlcommentformwrap_' + postid + '_' + replycommentid).show();
         }, 'a[id^="showcommentform_"]');
+
+        Y.one('#tl-posts').delegate('click', function (e) {
+            e.preventDefault();
+            onClickShowComments(e.target);
+        }, 'a[id^="tlshowcomments_"]');
+
+        Y.one('#tl-posts').delegate('click', function (e) {
+            e.preventDefault();
+            onClickCloseComments();
+        }, 'span[id^="tlclosecomments_"]');
 
         // ... not lazy loaded postform elements
 
