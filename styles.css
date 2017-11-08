@@ -355,6 +355,10 @@ body#page-course-format-socialwall-pages-addactivity .mform:not(.unresponsive) .
     background-color: #000000;
 }
 
+.tl-showcomments.not-comments {
+    display: none;
+}
+
 @media (max-width:550px) {
     .format-socialwall #postform #sw-addactivitylink {
         margin-right: 0;

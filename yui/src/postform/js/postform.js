@@ -196,6 +196,14 @@ M.format_socialwall.postforminit = function (data) {
         var showcomments = Y.one('#tlshowcomments_' + responsedata.postid);
         if (showcomments) {
             showcomments.setHTML(M.str.format_socialwall.showcomments.replace('{$a}', responsedata.countcomments));
+
+            console.log(responsedata.countcomments);
+            console.log(showcomments.ancestor('.tl-showcomments'));
+            if (responsedata.countcomments > 0) {
+                showcomments.ancestor('.tl-showcomments').removeClass('not-comments');
+            } else {
+                showcomments.ancestor('.tl-showcomments').addClass('not-comments');
+            }
         }
 
         var countlikes = Y.one('#tlcountlikes_' + responsedata.postid);
@@ -214,6 +222,9 @@ M.format_socialwall.postforminit = function (data) {
         // get commentslist.
         var commentnode = Y.Node.create(responsedata.commenthtml);
         Y.one('#tlcomments_' + commentidentifier).prepend(commentnode);
+
+        onClickShowComments(responsedata.postid);
+
         updatePostCounts(responsedata);
     }
 
@@ -233,9 +244,9 @@ M.format_socialwall.postforminit = function (data) {
         });
     }
 
-    function onClickShowComments(linknode) {
+    function onClickShowComments(postid) {
 
-        Y.one('#tlshowcomments_' + linknode.get('id').split('_')[1] + '_0').replaceClass('comments-hide', 'comments-show');
+        Y.one('#tlshowcomments_' + postid + '_0').replaceClass('comments-hide', 'comments-show');
 
         Y.one('body').delegate('key', function (e) {
             e.preventDefault();
@@ -509,7 +520,8 @@ M.format_socialwall.postforminit = function (data) {
 
         Y.one('#tl-posts').delegate('click', function (e) {
             e.preventDefault();
-            onClickShowComments(e.target);
+            var postid = e.target.get('id').split('_')[1];
+            onClickShowComments(postid);
         }, 'a[id^="tlshowcomments_"]');
 
         Y.one('#tl-posts').delegate('click', function (e) {

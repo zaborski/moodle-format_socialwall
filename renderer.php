@@ -518,10 +518,11 @@ class format_socialwall_renderer extends format_topics_renderer {
 
         $morecommentscount = $post->countcomments - $course->tlnumcomments;
 
-        if (empty($course->inlinecomments) && $post->countcomments > 0) {
+        if (empty($course->inlinecomments)) {
             $strshow = get_string('showcomments', 'format_socialwall', $post->countcomments);
             $l = html_writer::link('#', $strshow, array('id' => 'tlshowcomments_' . $post->id));
-            $p .= html_writer::tag('div', $l, array('class' => 'tl-showcomments'));
+            $countclass = (int)$post->countcomments > 0 ? 'tl-showcomments' : 'tl-showcomments not-comments';
+            $p .= html_writer::tag('div', $l, array('class' => $countclass));
 
             $closeicon = html_writer::tag('span', 'x', array('id' => 'tlclosecomments_' . $post->id, 'title' => get_string('closebuttontitle')));
 
