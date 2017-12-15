@@ -336,7 +336,7 @@ class format_socialwall_renderer extends format_topics_renderer {
      */
     protected function render_timeline_post($course, $post, $completion,
                                             $authors) {
-        global $USER;
+        global $USER, $CFG, $DB;
 
         $coursecontext = context_course::instance($post->courseid);
 
@@ -399,7 +399,42 @@ class format_socialwall_renderer extends format_topics_renderer {
             foreach ($post->attaches as $attachment) {
 
                 $cm = $modinfo->get_cm($attachment->coursemoduleid);
-                $modulehtml .= $this->courserenderer->course_section_cm_list_item($course, $completion, $cm, 0);
+
+                $contenthtml = '';
+                // To show images embed in content.
+                if ($cm->modname == 'resource') {
+                    require_once $CFG->dirroot . '/mod/resource/locallib.php';
+
+                    $resource = $DB->get_record('resource', array('id'=>$cm->instance));
+
+                    if ($resource) {
+                        $context = context_module::instance($cm->id);
+
+                        $fs = get_file_storage();
+                        $files = $fs->get_area_files($context->id, 'mod_resource', 'content', 0, 'sortorder DESC, id ASC', false);
+                        if (count($files) < 1) {
+                            return;
+                        } else {
+                            $file = reset($files);
+                            unset($files);
+                        }
+
+                        $path = '/' . $context->id . '/mod_resource/content/' . $resource->revision . $file->get_filepath() . $file->get_filename();
+                        $fullurl = file_encode_url($CFG->wwwroot.'/pluginfile.php', $path, false);
+                        $mimetype = $file->get_mimetype();
+                        $title    = $resource->name;
+                        if (file_mimetype_in_typegroup($mimetype, 'web_image')) {  // It's an image
+                            $imageurl = new moodle_url('/mod/resource/view.php', array('id' => $cm->id));
+                            $contenthtml = html_writer::tag('a', resourcelib_embed_image($fullurl, $title), array('href' => $imageurl));
+                        }
+                    }
+                }
+
+                if (!empty($contenthtml)) {
+                    $modulehtml .= $contenthtml;
+                } else {
+                    $modulehtml .= $this->courserenderer->course_section_cm_list_item($course, $completion, $cm, 0);
+                }
 
                 if (isset($post->grades[$attachment->coursemoduleid])) {
                     $modulehtml .= $this->render_timeline_grades($authors, $post->grades[$attachment->coursemoduleid]);

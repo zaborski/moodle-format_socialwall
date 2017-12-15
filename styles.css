@@ -385,3 +385,7 @@ body#page-course-format-socialwall-pages-addactivity .mform:not(.unresponsive) .
         padding-right: 0;
     }
 }
+
+li.tl-post .resourcecontent.resourceimg img {
+    max-height: 250px;
+}
