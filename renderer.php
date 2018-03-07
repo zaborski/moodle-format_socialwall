@@ -176,7 +176,7 @@ class format_socialwall_renderer extends format_topics_renderer {
         }
 
         $c = html_writer::tag('div', fullname($commentauthor) . $dl, array('class' => 'tl-authorname'));
-        $c .= html_writer::tag('div', $comment->text);
+        $c .= html_writer::tag('div', format_text($comment->text));
         $c .= html_writer::tag('span', $this->render_timeline_comment_ago($comment->timecreated), array('class' => 'tl-timeago'));
 
         $o .= html_writer::tag('div', $c, array('class' => 'tl-text'));
@@ -335,7 +335,7 @@ class format_socialwall_renderer extends format_topics_renderer {
      */
     protected function render_timeline_post($course, $post, $completion,
                                             $authors) {
-        global $USER;
+        global $USER, $CFG, $DB;
 
         $coursecontext = context_course::instance($post->courseid);
 
@@ -398,7 +398,42 @@ class format_socialwall_renderer extends format_topics_renderer {
             foreach ($post->attaches as $attachment) {
 
                 $cm = $modinfo->get_cm($attachment->coursemoduleid);
-                $modulehtml .= $this->courserenderer->course_section_cm_list_item($course, $completion, $cm, 0);
+
+                $contenthtml = '';
+                // To show images embed in content.
+                if ($cm->modname == 'resource') {
+                    require_once $CFG->dirroot . '/mod/resource/locallib.php';
+
+                    $resource = $DB->get_record('resource', array('id'=>$cm->instance));
+
+                    if ($resource) {
+                        $context = context_module::instance($cm->id);
+
+                        $fs = get_file_storage();
+                        $files = $fs->get_area_files($context->id, 'mod_resource', 'content', 0, 'sortorder DESC, id ASC', false);
+                        if (count($files) < 1) {
+                            return;
+                        } else {
+                            $file = reset($files);
+                            unset($files);
+                        }
+
+                        $path = '/' . $context->id . '/mod_resource/content/' . $resource->revision . $file->get_filepath() . $file->get_filename();
+                        $fullurl = file_encode_url($CFG->wwwroot.'/pluginfile.php', $path, false);
+                        $mimetype = $file->get_mimetype();
+                        $title    = $resource->name;
+                        if (file_mimetype_in_typegroup($mimetype, 'web_image')) {  // It's an image
+                            $imageurl = new moodle_url('/mod/resource/view.php', array('id' => $cm->id));
+                            $contenthtml = html_writer::tag('a', resourcelib_embed_image($fullurl, $title), array('href' => $imageurl));
+                        }
+                    }
+                }
+
+                if (!empty($contenthtml)) {
+                    $modulehtml .= $contenthtml;
+                } else {
+                    $modulehtml .= $this->courserenderer->course_section_cm_list_item($course, $completion, $cm, 0);
+                }
 
                 if (isset($post->grades[$attachment->coursemoduleid])) {
                     $modulehtml .= $this->render_timeline_grades($authors, $post->grades[$attachment->coursemoduleid]);
@@ -511,16 +546,42 @@ class format_socialwall_renderer extends format_topics_renderer {
         $p .= html_writer::tag('div', $actionarea, array('class' => 'tl-post-actionarea'));
 
         // ... print out all comments.
+        $courseconfig = get_config('format_socialwall');
+
         $c = $this->render_timeline_comments($post, $authors, $coursecontext, $course);
-        $p .= html_writer::tag('ul', $c, array('class' => 'tl-comments', 'id' => 'tlcomments_' . $post->id . '_0'));
 
         $morecommentscount = $post->countcomments - $course->tlnumcomments;
-        if ($morecommentscount > 0) {
 
-            $url = new moodle_url('/course/format/socialwall/action.php');
-            $strmore = get_string('showallcomments', 'format_socialwall', $morecommentscount);
-            $l = html_writer::link('#', $strmore, array('id' => 'tlshowall_' . $post->id));
-            $p .= html_writer::tag('div', $l, array('class' => 'tl-showall'));
+        if (empty($course->inlinecomments)) {
+            $strshow = get_string('showcomments', 'format_socialwall', $post->countcomments);
+            $l = html_writer::link('#', $strshow, array('id' => 'tlshowcomments_' . $post->id));
+            $countclass = (int)$post->countcomments > 0 ? 'tl-showcomments' : 'tl-showcomments not-comments';
+            $p .= html_writer::tag('div', $l, array('class' => $countclass));
+
+            $closeicon = html_writer::tag('span', 'x', array('id' => 'tlclosecomments_' . $post->id, 'title' => get_string('closebuttontitle')));
+
+            $comments = html_writer::tag('div', $closeicon, array('class' => 'tl-w-comments-title'));
+            $comments .= html_writer::tag('ul', $c, array('class' => 'tl-comments', 'id' => 'tlcomments_' . $post->id . '_0'));
+
+            if ($morecommentscount > 0) {
+
+                $url = new moodle_url('/course/format/socialwall/action.php');
+                $strmore = get_string('showallcomments', 'format_socialwall', $morecommentscount);
+                $l = html_writer::link('#', $strmore, array('id' => 'tlshowall_' . $post->id));
+                $comments .= html_writer::tag('div', $l, array('class' => 'tl-showall'));
+            }
+
+            $p .= html_writer::tag('div', $comments, array('class' => 'w-comments comments-hide', 'id' => 'tlshowcomments_' . $post->id . '_0'));
+        } else {
+            $p .= html_writer::tag('ul', $c, array('class' => 'tl-comments', 'id' => 'tlcomments_' . $post->id . '_0'));
+
+            if ($morecommentscount > 0) {
+
+                $url = new moodle_url('/course/format/socialwall/action.php');
+                $strmore = get_string('showallcomments', 'format_socialwall', $morecommentscount);
+                $l = html_writer::link('#', $strmore, array('id' => 'tlshowall_' . $post->id));
+                $p .= html_writer::tag('div', $l, array('class' => 'tl-showall'));
+            }
         }
 
         $o .= html_writer::tag('div', $p, array('class' => 'tl-text'));
@@ -854,7 +915,7 @@ class format_socialwall_renderer extends format_topics_renderer {
         );
 
         $this->page->requires->strings_for_js(
-                array('counttotalpost', 'like', 'likenomore', 'countlikes', 'countcomments', 'textrequired', 'confirmdeletecomment'), 'format_socialwall');
+                array('counttotalpost', 'like', 'likenomore', 'countlikes', 'countcomments', 'textrequired', 'confirmdeletecomment', 'showcomments'), 'format_socialwall');
 
         $this->page->requires->yui_module(
                 'moodle-format_socialwall-postform', 'M.format_socialwall.postforminit', array($args), null, true);
