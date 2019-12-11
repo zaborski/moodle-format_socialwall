@@ -182,3 +182,7 @@ $string['updatepostfiltered'] = 'Timeline is filtered to show the post to update
 $string['uploadafile'] = 'Upload a file';
 $string['unlockpost'] = 'Post is locked, click to unlock';
 $string['writecomment'] = 'Write a comment';
+$string['inlinecomments'] = 'Inline comments';
+$string['inlinecommentsdesc'] = 'If checked, the comments are shown on post bottom, else, the comments are shown in a new modal window.';
+$string['inlinecomments_help'] = 'It define the comments visualization mode.';
+$string['showcomments'] = 'Show comments ({$a})';

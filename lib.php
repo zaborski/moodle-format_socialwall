@@ -35,7 +35,7 @@ require_once($CFG->dirroot . '/course/format/socialwall/pages/post_form.php');
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class format_socialwall extends format_topics {
-    
+
     /**
      * Custom action after section has been moved in AJAX mode
      *
@@ -115,6 +115,10 @@ class format_socialwall extends format_topics {
                 'deletemodspermanently' => array(
                     'default' => $courseconfig->deleteafterunenrol,
                     'type' => PARAM_BOOL
+                ),
+                'inlinecomments' => array(
+                    'default' => $courseconfig->inlinecomments,
+                    'type' => PARAM_BOOL
                 )
             );
         }
@@ -174,6 +178,12 @@ class format_socialwall extends format_topics {
                     'label' => new lang_string('deletemodspermanently', 'format_socialwall'),
                     'element_type' => 'selectyesno',
                     'help' => 'deletemodspermanently',
+                    'help_component' => 'format_socialwall'
+                ),
+                'inlinecomments' => array(
+                    'label' => new lang_string('inlinecomments', 'format_socialwall'),
+                    'element_type' => 'selectyesno',
+                    'help' => 'inlinecomments',
                     'help_component' => 'format_socialwall'
                 )
             );

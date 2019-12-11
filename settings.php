@@ -76,4 +76,10 @@ if ($ADMIN->fulltree) {
             new lang_string('deleteafterunenrol', 'format_socialwall'),
             new lang_string('deleteafterunenroldesc', 'format_socialwall'), 0)
     );
+
+    $settings->add(new admin_setting_configcheckbox(
+            'format_socialwall/inlinecomments',
+            new lang_string('inlinecomments', 'format_socialwall'),
+            new lang_string('inlinecommentsdesc', 'format_socialwall'), 1)
+    );
 }
